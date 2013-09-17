@@ -60,7 +60,7 @@ HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFA
 	HRESULT hr = S_OK;
 	V_RETURN( SpinFirework.CreateResource( pd3dDevice ));
 	V_RETURN( PostEffect_Glow.CreateResource( pd3dDevice, SpinFirework.m_pOutputTextureRV, &SpinFirework.m_Camera ));
-	V_RETURN( PostEffect_Blur.CreateResource( pd3dDevice, PostEffect_Glow.m_pOutputTextureRV ));
+	V_RETURN( PostEffect_Blur.CreateResource( pd3dDevice, PostEffect_Glow.m_pOutputTextureSRV ));
 	V_RETURN( MultiTexture.CreateResource( pd3dDevice, PostEffect_Blur.m_pOutputTextureSRV ));
 
 	return S_OK;

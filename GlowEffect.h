@@ -22,7 +22,7 @@ struct GE_ConstBuffer
 	UINT DepthWidth;
 	UINT DepthHeight;
 	float glow_factor;
-	float radius;
+	float blend_factor;
 };
 
 class GlowEffect
@@ -36,18 +36,18 @@ public:
 	ID3D11InputLayout*				m_pVertexLayout;
 	ID3D11Buffer*					m_pVertexBuffer; 
 
-	ID3D11ShaderResourceView*		m_pInputTextureRV;
+	ID3D11ShaderResourceView*		m_pInputTextureSRV;
 	ID3D11SamplerState*				m_pGeneralTexSS;
 
 	ID3D11Texture2D*				m_pGlow_H_Texture2D;
-	ID3D11Texture2D*				m_pGlow_V_Texture2D;
+	ID3D11Texture2D*				m_pGlow_HV_Texture2D;
 	ID3D11Texture2D*				m_pOutputTexture2D;
 	ID3D11RenderTargetView*			m_pGlow_H_TextureRTV;
-	ID3D11RenderTargetView*			m_pGlow_V_TextureRTV;
+	ID3D11RenderTargetView*			m_pGlow_HV_TextureRTV;
 	ID3D11RenderTargetView*			m_pOutputTextureRTV;
-	ID3D11ShaderResourceView*		m_pGlow_H_TextureRV; 
-	ID3D11ShaderResourceView*		m_pGlow_V_TextureRV; 
-	ID3D11ShaderResourceView*		m_pOutputTextureRV; 
+	ID3D11ShaderResourceView*		m_pGlow_H_TextureSRV; 
+	ID3D11ShaderResourceView*		m_pGlow_HV_TextureSRV; 
+	ID3D11ShaderResourceView*		m_pOutputTextureSRV; 
 
 	ID3D11BlendState*				m_pOutputBlendState;
 
@@ -72,13 +72,13 @@ public:
 		m_rendertargetWidth=width;
 		m_rendertargetHeight=height;
 
-		m_renderGlowTargetWidth = m_rendertargetWidth/2;
-		m_renderGlowTargetHeight = m_rendertargetHeight/2;
+		m_renderGlowTargetWidth = m_rendertargetWidth / 8.0;
+		m_renderGlowTargetHeight = m_rendertargetHeight / 8.0;
 
 		m_CBperResize.DepthWidth = m_rendertargetWidth;
 		m_CBperResize.DepthHeight = m_rendertargetHeight;
-		m_CBperResize.glow_factor = 1;
-		m_CBperResize.radius = 7;
+		m_CBperResize.glow_factor = 4.5;
+		m_CBperResize.blend_factor = 1;
 	}
 
 	HRESULT Initial()
@@ -88,7 +88,7 @@ public:
 	}
 
 	HRESULT CreateResource(ID3D11Device* pd3dDevice,
-		ID3D11ShaderResourceView* pInputTextureRV, CModelViewerCamera* pCamera)
+		ID3D11ShaderResourceView* pInputTextureSRV, CModelViewerCamera* pCamera)
 	{
 		HRESULT hr=S_OK;
 		m_pCamera = pCamera;
@@ -116,7 +116,7 @@ public:
 		V_RETURN(pd3dDevice->CreateInputLayout(layout,ARRAYSIZE(layout),pVSBlob->GetBufferPointer(),pVSBlob->GetBufferSize(),&m_pVertexLayout));
 		pVSBlob->Release();
 
-		m_pInputTextureRV=pInputTextureRV;
+		m_pInputTextureSRV=pInputTextureSRV;
 
 		// Create the vertex buffer
 		D3D11_BUFFER_DESC bd = {0};
@@ -151,29 +151,29 @@ public:
 		RTtextureDesc.MiscFlags=0;
 
 		V_RETURN(pd3dDevice->CreateTexture2D(&RTtextureDesc,NULL,&m_pGlow_H_Texture2D));
-		V_RETURN(pd3dDevice->CreateTexture2D(&RTtextureDesc,NULL,&m_pGlow_V_Texture2D));
+		V_RETURN(pd3dDevice->CreateTexture2D(&RTtextureDesc,NULL,&m_pGlow_HV_Texture2D));
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC RTshaderResourceDesc;
 		RTshaderResourceDesc.Format=RTtextureDesc.Format;
 		RTshaderResourceDesc.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;
 		RTshaderResourceDesc.Texture2D.MostDetailedMip=0;
 		RTshaderResourceDesc.Texture2D.MipLevels=1;
-		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pGlow_H_Texture2D,&RTshaderResourceDesc,&m_pGlow_H_TextureRV));
-		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pGlow_V_Texture2D,&RTshaderResourceDesc,&m_pGlow_V_TextureRV));
+		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pGlow_H_Texture2D,&RTshaderResourceDesc,&m_pGlow_H_TextureSRV));
+		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pGlow_HV_Texture2D,&RTshaderResourceDesc,&m_pGlow_HV_TextureSRV));
 
 		D3D11_RENDER_TARGET_VIEW_DESC	RTviewDesc;
 		RTviewDesc.Format=RTtextureDesc.Format;
 		RTviewDesc.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
 		RTviewDesc.Texture2D.MipSlice=0;
 		V_RETURN(pd3dDevice->CreateRenderTargetView(m_pGlow_H_Texture2D,&RTviewDesc,&m_pGlow_H_TextureRTV));
-		V_RETURN(pd3dDevice->CreateRenderTargetView(m_pGlow_V_Texture2D,&RTviewDesc,&m_pGlow_V_TextureRTV));
+		V_RETURN(pd3dDevice->CreateRenderTargetView(m_pGlow_HV_Texture2D,&RTviewDesc,&m_pGlow_HV_TextureRTV));
 
 		RTtextureDesc.Width=m_rendertargetWidth;
 		RTtextureDesc.Height=m_rendertargetHeight;
 		V_RETURN(pd3dDevice->CreateTexture2D(&RTtextureDesc,NULL,&m_pOutputTexture2D));
 
 		RTshaderResourceDesc.Format=RTtextureDesc.Format;
-		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pOutputTexture2D,&RTshaderResourceDesc,&m_pOutputTextureRV));
+		V_RETURN(pd3dDevice->CreateShaderResourceView(m_pOutputTexture2D,&RTshaderResourceDesc,&m_pOutputTextureSRV));
 		
 		RTviewDesc.Format=RTtextureDesc.Format;
 		V_RETURN(pd3dDevice->CreateRenderTargetView(m_pOutputTexture2D,&RTviewDesc,&m_pOutputTextureRTV));
@@ -232,15 +232,15 @@ public:
 		SAFE_RELEASE(m_pVertexLayout);
 		SAFE_RELEASE(m_pVertexBuffer);
 
-		//SAFE_RELEASE(m_pOutputTextureRV);
+		//SAFE_RELEASE(m_pOutputTextureSRV);
 		SAFE_RELEASE(m_pGlow_H_Texture2D);
 		SAFE_RELEASE(m_pGlow_H_TextureRTV);
-		SAFE_RELEASE(m_pGlow_H_TextureRV);
-		SAFE_RELEASE(m_pGlow_V_Texture2D);
-		SAFE_RELEASE(m_pGlow_V_TextureRTV);
-		SAFE_RELEASE(m_pGlow_V_TextureRV);
+		SAFE_RELEASE(m_pGlow_H_TextureSRV);
+		SAFE_RELEASE(m_pGlow_HV_Texture2D);
+		SAFE_RELEASE(m_pGlow_HV_TextureRTV);
+		SAFE_RELEASE(m_pGlow_HV_TextureSRV);
 		SAFE_RELEASE(m_pOutputTexture2D);
-		SAFE_RELEASE(m_pOutputTextureRV);
+		SAFE_RELEASE(m_pOutputTextureSRV);
 		SAFE_RELEASE(m_pOutputTextureRTV);
 
 		SAFE_RELEASE(m_pCBperResize);
@@ -260,35 +260,27 @@ public:
 			pd3dImmediateContext->OMSetRenderTargets(1,&m_pGlow_H_TextureRTV,NULL);
 			pd3dImmediateContext->OMSetBlendState( m_pOutputBlendState, NULL, 0xffffffff );
 
-			D3DXVECTOR3 eyePos = *(m_pCamera->GetEyePt());
-			D3DXVECTOR3 lookPos = *(m_pCamera->GetLookAtPt());
-			D3DXVECTOR3 dist = eyePos-lookPos;
-			FLOAT distance = D3DXVec3Length( &dist );
-
-			m_CBperResize.radius = 5.0f + 150.0f/distance;
-		
-
 			pd3dImmediateContext->GSSetConstantBuffers( 0, 1, &m_pCBperResize );
 			pd3dImmediateContext->PSSetConstantBuffers( 0, 1, &m_pCBperResize );
 			pd3dImmediateContext->VSSetShader( m_pVertexShader, NULL, 0 );
 			pd3dImmediateContext->GSSetShader(m_pGeometryShader,NULL,0);	
 			pd3dImmediateContext->PSSetShader( m_pPixelShader_H, NULL, 0 );
-			pd3dImmediateContext->PSSetShaderResources(0, 1, &m_pInputTextureRV);
+			pd3dImmediateContext->PSSetShaderResources(0, 1, &m_pInputTextureSRV);
 
 			m_RTviewport.Height = m_renderGlowTargetHeight;
 			m_RTviewport.Width = m_renderGlowTargetWidth;
 			pd3dImmediateContext->RSSetViewports(1, &m_RTviewport);
 			
-			m_CBperResize.DepthWidth = m_rendertargetWidth;
-			m_CBperResize.DepthHeight = m_rendertargetHeight;
+			m_CBperResize.DepthWidth = m_renderGlowTargetWidth;
+			m_CBperResize.DepthHeight = m_renderGlowTargetHeight;
 
 			pd3dImmediateContext->UpdateSubresource( m_pCBperResize, 0, NULL, &m_CBperResize, 0, 0 );
 
 			pd3dImmediateContext->Draw(1,0);	
 
-			pd3dImmediateContext->OMSetRenderTargets(1,&m_pGlow_V_TextureRTV,NULL);
+			pd3dImmediateContext->OMSetRenderTargets(1,&m_pGlow_HV_TextureRTV,NULL);
 			pd3dImmediateContext->PSSetShader( m_pPixelShader_V, NULL, 0 );
-			pd3dImmediateContext->PSSetShaderResources(1, 1, &m_pGlow_H_TextureRV);
+			pd3dImmediateContext->PSSetShaderResources(1, 1, &m_pGlow_H_TextureSRV);
 			pd3dImmediateContext->Draw(1,0);	
 
 			float ClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -298,7 +290,7 @@ public:
 
 			pd3dImmediateContext->OMSetRenderTargets(1,&m_pOutputTextureRTV,NULL);
 			pd3dImmediateContext->PSSetShader( m_pPixelShader_ALL, NULL, 0 );
-			pd3dImmediateContext->PSSetShaderResources(2, 1, &m_pGlow_V_TextureRV);
+			pd3dImmediateContext->PSSetShaderResources(2, 1, &m_pGlow_HV_TextureSRV);
 			pd3dImmediateContext->PSSetSamplers(0,1,&m_pGeneralTexSS);
 
 			m_RTviewport.Height = m_rendertargetHeight;
