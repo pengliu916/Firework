@@ -8,8 +8,8 @@
 #include "GlowEffect.h"
 #include "MotionBlurEffect.h"
 
-#define SUB_TEXTUREWIDTH 1024
-#define SUB_TEXTUREHEIGHT 768
+#define SUB_TEXTUREWIDTH 1280
+#define SUB_TEXTUREHEIGHT 800
 
 //--------------------------------------------------------------------------------------
 //Global Variables
@@ -18,12 +18,98 @@ MultiTexturePresenter						MultiTexture = MultiTexturePresenter(1,true,SUB_TEXTU
 SpinningFirework							SpinFirework = SpinningFirework(SUB_TEXTUREWIDTH,SUB_TEXTUREHEIGHT);
 GlowEffect									PostEffect_Glow = GlowEffect(SUB_TEXTUREWIDTH,SUB_TEXTUREHEIGHT);
 MotionBlurEffect							PostEffect_Blur = MotionBlurEffect(SUB_TEXTUREWIDTH,SUB_TEXTUREHEIGHT);
+
+CDXUTDialogResourceManager					DialogResourceManager; 
+CDXUTDialog									UI;
+
+//--------------------------------------------------------------------------------------
+// UI control IDs
+//--------------------------------------------------------------------------------------
+
+#define IDC_GLOWFACTOR_STATIC		1
+#define IDC_GLOWFACTOR_SLIDER		2
+#define IDC_GLOWBLENDFACTOR_STATIC	3
+#define IDC_GLOWBLENDFACTOR_SLIDER	4
+#define IDC_BLURFACTOR_STATIC		5
+#define IDC_BLURFACTOR_SLIDER		6
+
+#define IDC_FIREINTERVAL_STATIC		7
+#define IDC_FIREINTERVAL_SLIDER		8
+#define IDC_NUM_FLY1_STATIC			9
+#define IDC_NUM_FLY1_SLIDER			10
+#define IDC_MAX_SUBDETONATE_STATIC	11
+#define IDC_MAX_SUBDETONATE_SLIDER	12
+#define IDC_DETONATE_LIFE_STATIC	13
+#define IDC_DETONATE_LIFE_SLIDER	14
+#define IDC_FIREFLY_LIFE_STATIC		15
+#define IDC_FIREFLY_LIFE_SLIDER		16
+#define IDC_SDETONATE_LIFE_STATIC	17
+#define IDC_SDETONATE_LIFE_SLIDER	18
+#define IDC_FIREFLY2_LIFE_STATIC	19
+#define IDC_FIREFLY2_LIFE_SLIDER	20
+
+
+void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl, void* pUserContext );
+
 //--------------------------------------------------------------------------------------
 //Initialization
 //--------------------------------------------------------------------------------------
 HRESULT Initial()
 { 
 	HRESULT hr = S_OK;
+
+	UI.Init( &DialogResourceManager );
+	//UI.SetFont
+	UI.SetCallback( OnGUIEvent ); int iY = 10;
+
+	UI.SetFont( 1, L"Comic Sans MS", 400, 400 );
+	UI.SetFont( 2, L"Courier New", 16, FW_NORMAL );
+
+	WCHAR sz[100];
+	iY += 24;
+	swprintf_s( sz, 100, L"Glow factor: %0.2f", PostEffect_Glow.m_CBperResize.glow_factor );
+	UI.AddStatic( IDC_GLOWFACTOR_STATIC, sz, 0, iY, 170, 23 );
+	UI.AddSlider( IDC_GLOWFACTOR_SLIDER, 0, iY += 26, 170, 23, 0, 1000, 450 );
+
+	swprintf_s( sz, 100, L"Blend factor: %0.2f", PostEffect_Glow.m_CBperResize.blend_factor );
+	UI.AddStatic( IDC_GLOWBLENDFACTOR_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_GLOWBLENDFACTOR_SLIDER, 0, iY += 26, 170, 23, 0, 300, 100 );
+
+	swprintf_s( sz, 100, L"Blur factor: %0.2f", PostEffect_Blur.m_CBperResize.blur_factor );
+	UI.AddStatic( IDC_BLURFACTOR_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_BLURFACTOR_SLIDER, 0, iY += 26, 170, 23, 800, 1000, 970 );
+
+
+	swprintf_s( sz, 100, L"Fire Interval: %0.2f", SpinFirework.m_CBallInOne.fFireInterval );
+	UI.AddStatic( IDC_FIREINTERVAL_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_FIREINTERVAL_SLIDER, 0, iY += 26, 170, 23, 5, 500, 80 );
+
+	swprintf_s( sz, 100, L"Num of Firefly: %i", SpinFirework.m_CBallInOne.iNumFirefly1s );
+	UI.AddStatic( IDC_NUM_FLY1_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_NUM_FLY1_SLIDER, 0, iY += 26, 170, 23, 1, 93, 93 );
+	
+	swprintf_s( sz, 100, L"Max SubDetonate: %0.2f", SpinFirework.m_CBallInOne.fMaxSubDetonates );
+	UI.AddStatic( IDC_MAX_SUBDETONATE_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_MAX_SUBDETONATE_SLIDER, 0, iY += 26, 170, 23, 1, 93, 40 );
+
+	swprintf_s( sz, 100, L"Detonate Life: %0.2fs", SpinFirework.m_CBallInOne.fDetonateLife );
+	UI.AddStatic( IDC_DETONATE_LIFE_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_DETONATE_LIFE_SLIDER, 0, iY += 26, 170, 23, 10, 100, 35 );
+
+	swprintf_s( sz, 100, L"Firefly Life: %0.2fs", SpinFirework.m_CBallInOne.fFirefly1Life );
+	UI.AddStatic( IDC_FIREFLY_LIFE_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_FIREFLY_LIFE_SLIDER, 0, iY += 26, 170, 23, 10, 100, 35 );
+
+	swprintf_s( sz, 100, L"SubDetonate Life: %0.2fs", SpinFirework.m_CBallInOne.fSubDetonateLife );
+	UI.AddStatic( IDC_SDETONATE_LIFE_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_SDETONATE_LIFE_SLIDER, 0, iY += 26, 170, 23, 10, 60, 15 );
+
+	swprintf_s( sz, 100, L"Firefly2 Life: %0.2fs", SpinFirework.m_CBallInOne.fFirefly2Life );
+	UI.AddStatic( IDC_FIREFLY2_LIFE_STATIC, sz, 0,  iY += 26,170, 23 );
+	UI.AddSlider( IDC_FIREFLY2_LIFE_SLIDER, 0, iY += 26, 170, 23, 10, 60, 25 );
+
+
+
 	V_RETURN( MultiTexture.Initial() );
 	V_RETURN( SpinFirework.Initial() );
 	V_RETURN( PostEffect_Glow.Initial() );
@@ -58,6 +144,9 @@ HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFA
 									  void* pUserContext )
 {
 	HRESULT hr = S_OK;
+	ID3D11DeviceContext* pd3dImmediateContext = DXUTGetD3D11DeviceContext();
+	V_RETURN( DialogResourceManager.OnD3D11CreateDevice( pd3dDevice, pd3dImmediateContext));
+
 	V_RETURN( SpinFirework.CreateResource( pd3dDevice ));
 	V_RETURN( PostEffect_Glow.CreateResource( pd3dDevice, SpinFirework.m_pOutputTextureRV, &SpinFirework.m_Camera ));
 	V_RETURN( PostEffect_Blur.CreateResource( pd3dDevice, PostEffect_Glow.m_pOutputTextureSRV ));
@@ -73,6 +162,11 @@ HRESULT CALLBACK OnD3D11CreateDevice( ID3D11Device* pd3dDevice, const DXGI_SURFA
 HRESULT CALLBACK OnD3D11ResizedSwapChain( ID3D11Device* pd3dDevice, IDXGISwapChain* pSwapChain,
 										  const DXGI_SURFACE_DESC* pBackBufferSurfaceDesc, void* pUserContext )
 {
+	HRESULT hr;
+	V_RETURN( DialogResourceManager.OnD3D11ResizedSwapChain( pd3dDevice, pBackBufferSurfaceDesc ));
+	UI.SetLocation( pBackBufferSurfaceDesc->Width - 180, 0 );
+	UI.SetSize( 180, 600 );
+
 	MultiTexture.Resize();
 	SpinFirework.Resize();
 	//PostEffect_Glow.Resize();
@@ -101,6 +195,9 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 	PostEffect_Blur.Render( pd3dImmediateContext );
 	MultiTexture.Render( pd3dImmediateContext );
 
+	DXUT_BeginPerfEvent( DXUT_PERFEVENTCOLOR2, L"UI" );
+	UI.OnRender( fElapsedTime );
+	DXUT_EndPerfEvent();
 }
 
 
@@ -109,10 +206,8 @@ void CALLBACK OnD3D11FrameRender( ID3D11Device* pd3dDevice, ID3D11DeviceContext*
 //--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11ReleasingSwapChain( void* pUserContext )
 {
-	MultiTexture.Release();
-	PostEffect_Blur.Release();
-	PostEffect_Glow.Release();
-	SpinFirework.Release();
+
+	DialogResourceManager.OnD3D11ReleasingSwapChain();
 }
 
 
@@ -121,6 +216,12 @@ void CALLBACK OnD3D11ReleasingSwapChain( void* pUserContext )
 //--------------------------------------------------------------------------------------
 void CALLBACK OnD3D11DestroyDevice( void* pUserContext )
 {
+	DialogResourceManager.OnD3D11DestroyDevice();
+	DXUTGetGlobalResourceCache().OnDestroyDevice();
+	MultiTexture.Release();
+	PostEffect_Blur.Release();
+	PostEffect_Glow.Release();
+	SpinFirework.Release();
 }
 
 
@@ -130,6 +231,16 @@ void CALLBACK OnD3D11DestroyDevice( void* pUserContext )
 LRESULT CALLBACK MsgProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam,
 						  bool* pbNoFurtherProcessing, void* pUserContext )
 {
+	 // Pass messages to dialog resource manager calls so GUI state is updated correctly
+	*pbNoFurtherProcessing = DialogResourceManager.MsgProc( hWnd, uMsg, wParam, lParam );
+	if( *pbNoFurtherProcessing )
+		return 0;
+
+	 // Give the dialogs a chance to handle the message first
+	*pbNoFurtherProcessing = UI.MsgProc( hWnd, uMsg, wParam, lParam );
+	if( *pbNoFurtherProcessing )
+		return 0;
+
 	SpinFirework.HandleMessages( hWnd, uMsg, wParam, lParam );
 	PostEffect_Glow.HandleMessages( hWnd, uMsg, wParam, lParam );
 	PostEffect_Blur.HandleMessages( hWnd, uMsg, wParam, lParam );
@@ -154,6 +265,116 @@ void CALLBACK OnMouse( bool bLeftButtonDown, bool bRightButtonDown, bool bMiddle
 {
 }
 
+
+//--------------------------------------------------------------------------------------
+// Handles the GUI events
+//--------------------------------------------------------------------------------------
+void CALLBACK OnGUIEvent( UINT nEvent, int nControlID, CDXUTControl* pControl, void* pUserContext )
+{
+	switch( nControlID )
+	{
+		case IDC_GLOWFACTOR_SLIDER:
+			{
+				WCHAR sz[100];
+				float glowFactor= ( float )( UI.GetSlider( IDC_GLOWFACTOR_SLIDER )->GetValue() * 0.01f );
+				swprintf_s( sz, 100, L"Glow Factor: %0.2f", glowFactor);
+				PostEffect_Glow.m_CBperResize.glow_factor = glowFactor;
+				UI.GetStatic( IDC_GLOWFACTOR_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_BLURFACTOR_SLIDER:
+			{
+				WCHAR sz[100];
+				float blurFactor= ( float )( UI.GetSlider( IDC_BLURFACTOR_SLIDER )->GetValue() * 0.001f );
+				swprintf_s( sz, 100, L"Blur Factor: %0.4f", blurFactor);
+				PostEffect_Blur.m_CBperResize.blur_factor = blurFactor;
+				UI.GetStatic( IDC_BLURFACTOR_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_GLOWBLENDFACTOR_SLIDER:
+			{
+				WCHAR sz[100];
+				float blendFactor= ( float )( UI.GetSlider( IDC_GLOWBLENDFACTOR_SLIDER )->GetValue() * 0.01f );
+				swprintf_s( sz, 100, L"Blend Factor: %0.2f", blendFactor);
+				PostEffect_Glow.m_CBperResize.blend_factor = blendFactor;
+				UI.GetStatic( IDC_GLOWBLENDFACTOR_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_FIREINTERVAL_SLIDER:
+			{
+				WCHAR sz[100];
+				float fireInterval= ( float )( UI.GetSlider( IDC_FIREINTERVAL_SLIDER )->GetValue() * 0.01f );
+				swprintf_s( sz, 100, L"Fire Interval: %0.2f", fireInterval);
+				SpinFirework.m_CBallInOne.fFireInterval = fireInterval;
+				UI.GetStatic( IDC_FIREINTERVAL_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_NUM_FLY1_SLIDER:
+			{
+				WCHAR sz[100];
+				int numOfFirefly= UI.GetSlider( IDC_NUM_FLY1_SLIDER )->GetValue();
+				swprintf_s( sz, 100, L"Num Firefly: %i", numOfFirefly);
+				SpinFirework.m_CBallInOne.iNumFirefly1s = numOfFirefly;
+				UI.GetStatic( IDC_NUM_FLY1_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_MAX_SUBDETONATE_SLIDER:
+			{
+				WCHAR sz[100];
+				float maxSubdetonate= ( float )( UI.GetSlider( IDC_MAX_SUBDETONATE_SLIDER )->GetValue() );
+				swprintf_s( sz, 100, L"Max SubDetonate: %0.2f", maxSubdetonate);
+				SpinFirework.m_CBallInOne.fMaxSubDetonates = maxSubdetonate;
+				UI.GetStatic( IDC_MAX_SUBDETONATE_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_DETONATE_LIFE_SLIDER:
+			{
+				WCHAR sz[100];
+				float lifeOfDetonate= ( float )( UI.GetSlider( IDC_DETONATE_LIFE_SLIDER )->GetValue() * 0.1f );
+				swprintf_s( sz, 100, L"Detonate Life: %0.2fs", lifeOfDetonate);
+				SpinFirework.m_CBallInOne.fDetonateLife = lifeOfDetonate;
+				UI.GetStatic( IDC_DETONATE_LIFE_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_FIREFLY_LIFE_SLIDER:
+			{
+				WCHAR sz[100];
+				float lifeOfFirefly= ( float )( UI.GetSlider( IDC_FIREFLY_LIFE_SLIDER )->GetValue() *0.1f );
+				swprintf_s( sz, 100, L"Firefly Life: %0.2fs", lifeOfFirefly);
+				SpinFirework.m_CBallInOne.fFirefly1Life = lifeOfFirefly;
+				UI.GetStatic( IDC_FIREFLY_LIFE_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_FIREFLY2_LIFE_SLIDER:
+			{
+				WCHAR sz[100];
+				float lifeOfFirefly= ( float )( UI.GetSlider( IDC_FIREFLY2_LIFE_SLIDER )->GetValue() *0.1f );
+				swprintf_s( sz, 100, L"Firefly2 Life: %0.2fs", lifeOfFirefly);
+				SpinFirework.m_CBallInOne.fFirefly2Life = lifeOfFirefly;
+				UI.GetStatic( IDC_FIREFLY2_LIFE_STATIC )->SetText( sz );
+				break;
+			}
+
+		case IDC_SDETONATE_LIFE_SLIDER:
+			{
+				WCHAR sz[100];
+				float lifeOfSubDetonate= ( float )( UI.GetSlider( IDC_SDETONATE_LIFE_SLIDER )->GetValue() *0.1f );
+				swprintf_s( sz, 100, L"SubDetonate Life: %0.2fs", lifeOfSubDetonate);
+				SpinFirework.m_CBallInOne.fSubDetonateLife = lifeOfSubDetonate;
+				UI.GetStatic( IDC_SDETONATE_LIFE_STATIC )->SetText( sz );
+				break;
+			}
+	}
+
+}
 
 //--------------------------------------------------------------------------------------
 // Call if device was removed.  Return true to find a new device, false to quit
@@ -198,6 +419,9 @@ int WINAPI wWinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdL
 
 	DXUTInit( true, true, NULL ); // Parse the command line, show msgboxes on error, no extra command line params
 	DXUTSetCursorSettings( true, true ); // Show the cursor and clip it when in full screen
+	
+	Initial();
+	
 	DXUTCreateWindow( L"Particles System" );
 
 	// Only require 10-level hardware

@@ -56,7 +56,7 @@ void GSGenericHandler( VS_Update_INPUT input, uint primID : SV_PrimitiveID, inou
 	input.pos += input.vel * fElapsedTime;
 	input.vel += vFrameGravity;
 	input.Timer -= fElapsedTime;
-	//input.col +=  0.1*clamp( RandomDir( input.vel.y + primID).y,-1,1);
+	
 	outputStream.Append( input );
 }
 
@@ -132,7 +132,7 @@ void GSSubDetonateHandler( VS_Update_INPUT input, uint primID : SV_PrimitiveID, 
 }
 
 
-[maxvertexcount(80)]
+[maxvertexcount(93)]
 void AdvanceGS( point VS_Update_INPUT input[1], uint primID : SV_PrimitiveID, inout PointStream<VS_Update_INPUT> outputStream )
 {
 	if( input[0].Type == LAUNCHER )	GSLauncherHandler( input[0], primID, outputStream );
@@ -171,6 +171,8 @@ GS_Render_INPUT RenderVS( VS_Update_INPUT input )
 		output.color =float4(input.col,initAlpha*3);
 		output.color.gba *= ( input.Timer / fFirefly1Life );
 		output.color.g = 1.0f - output.color.g;
+		float flashing = clamp( normalize(RandomDir( input.vel.y)).x,0,1);
+		output.color *=  float4(flashing,flashing,flashing,1);
 		//output.color.a = 0.5;
 	}else if( input.Type == SUB_DETONATE ){
 		output.color = float4(input.col,1);

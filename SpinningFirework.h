@@ -108,7 +108,7 @@ public:
 		
 		m_CBallInOne.fFireInterval = 0.8f;
 		m_CBallInOne.fMaxSubDetonates = 40;
-		m_CBallInOne.iNumFirefly1s = 60;
+		m_CBallInOne.iNumFirefly1s = 93;
 		m_CBallInOne.fDetonateLife = 3.5;
 		m_CBallInOne.fFirefly1Life = 3.5;
 		m_CBallInOne.fSubDetonateLife = 1.5;
