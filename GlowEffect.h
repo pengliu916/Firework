@@ -72,8 +72,8 @@ public:
 		m_rendertargetWidth=width;
 		m_rendertargetHeight=height;
 
-		m_renderGlowTargetWidth = m_rendertargetWidth / 8.0;
-		m_renderGlowTargetHeight = m_rendertargetHeight / 8.0;
+		m_renderGlowTargetWidth = (UINT)(m_rendertargetWidth / 8.0);
+		m_renderGlowTargetHeight = (UINT)(m_rendertargetHeight / 8.0);
 
 		m_CBperResize.DepthWidth = m_rendertargetWidth;
 		m_CBperResize.DepthHeight = m_rendertargetHeight;
@@ -267,8 +267,8 @@ public:
 			pd3dImmediateContext->PSSetShader( m_pPixelShader_H, NULL, 0 );
 			pd3dImmediateContext->PSSetShaderResources(0, 1, &m_pInputTextureSRV);
 
-			m_RTviewport.Height = m_renderGlowTargetHeight;
-			m_RTviewport.Width = m_renderGlowTargetWidth;
+			m_RTviewport.Height = (FLOAT)m_renderGlowTargetHeight;
+			m_RTviewport.Width = (FLOAT)m_renderGlowTargetWidth;
 			pd3dImmediateContext->RSSetViewports(1, &m_RTviewport);
 			
 			m_CBperResize.DepthWidth = m_renderGlowTargetWidth;
@@ -293,8 +293,8 @@ public:
 			pd3dImmediateContext->PSSetShaderResources(2, 1, &m_pGlow_HV_TextureSRV);
 			pd3dImmediateContext->PSSetSamplers(0,1,&m_pGeneralTexSS);
 
-			m_RTviewport.Height = m_rendertargetHeight;
-			m_RTviewport.Width = m_rendertargetWidth;
+			m_RTviewport.Height = (FLOAT)m_rendertargetHeight;
+			m_RTviewport.Width = (FLOAT)m_rendertargetWidth;
 			pd3dImmediateContext->RSSetViewports(1, &m_RTviewport);
 			
 			m_CBperResize.DepthWidth = m_rendertargetWidth;

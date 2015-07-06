@@ -85,6 +85,11 @@
     <ClInclude Include="MotionBlurEffect.h" />
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="Firework.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
     <FxCompile Include="MultiTexturePresenter.fx" />
     <FxCompile Include="SpinningFirework.fx" />
     <FxCompile Include="GlowEffect.fx" />
@@ -92,10 +97,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Firework.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
 </Project>

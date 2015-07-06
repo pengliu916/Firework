@@ -121,7 +121,7 @@ public:
 		bd.Usage = D3D11_USAGE_DEFAULT;
 		bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		bd.CPUAccessFlags = 0    ;
-		bd.ByteWidth = sizeof(GE_ConstBuffer);
+		bd.ByteWidth = sizeof(BE_ConstBuffer);
 		V_RETURN(pd3dDevice->CreateBuffer( &bd, NULL, &m_pCBperResize ));
 		DXUT_SetDebugName( m_pCBperResize, "m_pCBperResize");
 

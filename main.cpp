@@ -8,8 +8,8 @@
 #include "GlowEffect.h"
 #include "MotionBlurEffect.h"
 
-#define SUB_TEXTUREWIDTH 1280
-#define SUB_TEXTUREHEIGHT 800
+#define SUB_TEXTUREWIDTH 1440
+#define SUB_TEXTUREHEIGHT 900
 
 //--------------------------------------------------------------------------------------
 //Global Variables
@@ -82,11 +82,11 @@ HRESULT Initial()
 
 	swprintf_s( sz, 100, L"Fire Interval: %0.2f", SpinFirework.m_CBallInOne.fFireInterval );
 	UI.AddStatic( IDC_FIREINTERVAL_STATIC, sz, 0,  iY += 26,170, 23 );
-	UI.AddSlider( IDC_FIREINTERVAL_SLIDER, 0, iY += 26, 170, 23, 5, 500, 80 );
+	UI.AddSlider( IDC_FIREINTERVAL_SLIDER, 0, iY += 26, 170, 23, 5, 500, 100 );
 
 	swprintf_s( sz, 100, L"Num of Firefly: %i", SpinFirework.m_CBallInOne.iNumFirefly1s );
 	UI.AddStatic( IDC_NUM_FLY1_STATIC, sz, 0,  iY += 26,170, 23 );
-	UI.AddSlider( IDC_NUM_FLY1_SLIDER, 0, iY += 26, 170, 23, 1, 93, 93 );
+	UI.AddSlider( IDC_NUM_FLY1_SLIDER, 0, iY += 26, 170, 23, 1, 93, 60 );
 	
 	swprintf_s( sz, 100, L"Max SubDetonate: %0.2f", SpinFirework.m_CBallInOne.fMaxSubDetonates );
 	UI.AddStatic( IDC_MAX_SUBDETONATE_STATIC, sz, 0,  iY += 26,170, 23 );

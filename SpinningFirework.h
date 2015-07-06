@@ -106,9 +106,9 @@ public:
 		m_pOutputTextureRV=NULL;
 		m_bFirst = true;
 		
-		m_CBallInOne.fFireInterval = 0.8f;
+		m_CBallInOne.fFireInterval = 1.0f;
 		m_CBallInOne.fMaxSubDetonates = 40;
-		m_CBallInOne.iNumFirefly1s = 93;
+		m_CBallInOne.iNumFirefly1s = 60;
 		m_CBallInOne.fDetonateLife = 3.5;
 		m_CBallInOne.fFirefly1Life = 3.5;
 		m_CBallInOne.fSubDetonateLife = 1.5;
@@ -187,10 +187,10 @@ public:
 
 		PARTICLE_V vertStart[4] =
 		{
-			{ XMFLOAT3( 100, -100, 0 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 0.5, 1, 1 ),float( 0 ), UINT( 0 ) },
-			{ XMFLOAT3( -100, -100, 0 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0, 0 ),float( 0 ), UINT( 0 ) },
-			{ XMFLOAT3( 0, -100, 100 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0.5, 0 ),float( 0 ), UINT( 0 ) },
-			{ XMFLOAT3( 0, -100, -100 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0, 1 ),float( 0 ), UINT( 0 ) },
+			{ XMFLOAT3( 120, -120, 0 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 0.5, 1, 1 ),float( 0 ), UINT( 0 ) },
+			{ XMFLOAT3( -120, -120, 0 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0, 0 ),float( 0 ), UINT( 0 ) },
+			{ XMFLOAT3( 0, -120, 120 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0.5, 0 ),float( 0 ), UINT( 0 ) },
+			{ XMFLOAT3( 0, -120, -120 ), XMFLOAT3( 0, 60, 0 ), XMFLOAT3( 1, 0, 1 ),float( 0 ), UINT( 0 ) },
 		};
 		vbInitData.pSysMem = vertStart;
 		vbInitData.SysMemPitch = sizeof( PARTICLE_V );

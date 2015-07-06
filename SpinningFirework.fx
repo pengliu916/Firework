@@ -66,7 +66,7 @@ void GSLauncherHandler( VS_Update_INPUT input, uint primID : SV_PrimitiveID, ino
 		float3 vRandom = normalize( RandomDir( input.Type + primID) );
 		VS_Update_INPUT output;
 		output.pos = input.pos + input.vel * fElapsedTime;
-		output.vel = input.vel + vRandom * float3(10,15,10);
+		output.vel = input.vel + vRandom *8;
 		output.col = 0.4 + abs( vRandom );
 		output.Timer = fDetonateLife + vRandom.x * 0.5;
 		output.Type = DETONAT;
